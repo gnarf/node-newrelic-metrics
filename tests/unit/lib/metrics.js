@@ -33,7 +33,7 @@ exports.Metric = {
 	},
 	"invalid units": function( test ) {
 		var invalid = [
-			"!", "@", "#", "Component/Test/sec", "test/no spaces"
+			"!", "@", "#", "Component/Test/sec", "test/no spaces", "!Value"
 		];
 		test.expect( invalid.length );
 		invalid.forEach( function( units ) {
@@ -45,7 +45,7 @@ exports.Metric = {
 	},
 	"valid units": function( test ) {
 		var valid = [
-			"Value/Sec", "Value|Count", "Value", "!Value"
+			"Value/Sec", "Value|Count", "Value", "|Value"
 		];
 		test.expect( valid.length );
 		valid.forEach( function( units ) {
