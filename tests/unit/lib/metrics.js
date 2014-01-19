@@ -1,7 +1,7 @@
 var sinon = require( "sinon" );
 var metrics = require( "../../../lib/metrics.js" );
 
-exports.Metric = {
+var tests = exports.Metric = {
 	"constructor exists": function( test ) {
 		test.expect( 2 );
 		test.ok( metrics.Metric, "exists" );
@@ -112,6 +112,29 @@ exports.Metric = {
 			this.metric.add( 200 );
 			test.deepEqual( this.metric.values, [ 100, 200 ] );
 			test.done();
-		}
+		},
+
+		// generated later:
+		summarize: {}
 	}
 };
+
+// generate summarize tests:
+[{
+	values: [],
+	expect: { min: 0, max: 0, count: 0, total: 0, sum_of_squares: 0 }
+}, {
+	values: [ 1, 2, 3, 4, 5 ],
+	expect: { min: 1, max: 5, count: 5, total: 15, sum_of_squares: 55 }
+}, {
+	values: [ 100 ],
+	expect: { min: 100, max: 100, count: 1, total: 100, sum_of_squares: 10000 }
+}].forEach( function( fixture ) {
+	var values = JSON.stringify( fixture.values );
+	tests[ "with instance" ].summarize[ values ] = function( test ) {
+		test.expect( 1 );
+		fixture.values.forEach( this.metric.add.bind( this.metric ) );
+		test.deepEqual( this.metric.summarize(), fixture.expect, values );
+		test.done();
+	};
+});
