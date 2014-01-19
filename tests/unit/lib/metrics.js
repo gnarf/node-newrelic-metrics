@@ -10,7 +10,7 @@ var tests = exports.Metric = {
 	},
 	"invalid names": function( test ) {
 		var invalid = [
-			1, null, undefined, "!", "@", "#", "Component/Test", "test/no spaces"
+			1, null, undefined, "!", "@", "#", "Component/Test"
 		];
 		test.expect( invalid.length );
 		invalid.forEach( function( name ) {
@@ -22,7 +22,7 @@ var tests = exports.Metric = {
 	},
 	"valid names": function( test ) {
 		var valid = [
-			"test/no_spaces", "Another/Metric_Name"
+			"test/no_spaces", "Another/Metric_Name", "test/allow spaces"
 		];
 		test.expect( valid.length );
 		valid.forEach( function( name ) {
