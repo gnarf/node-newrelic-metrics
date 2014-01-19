@@ -164,6 +164,12 @@ exports.Counter = {
 		test.equal( typeof metrics.Counter, "function" );
 		test.done();
 	},
+	"is a Metric": function( test ) {
+		test.expect( 2 );
+		test.ok( metrics.Counter.prototype instanceof metrics.Metric );
+		test.ok( new metrics.Counter("test", "Test/sec") instanceof metrics.Metric );
+		test.done();
+	},
 	"per second": {
 		setUp: function( done ) {
 			this.counter = new metrics.Counter( "Test", "Tests/second" );
