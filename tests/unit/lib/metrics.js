@@ -1,7 +1,7 @@
 var sinon = require( "sinon" );
 var metrics = require( "../../../lib/metrics.js" );
 
-var tests = exports.Metric = {
+var metricTests = exports.Metric = {
 	"constructor exists": function( test ) {
 		test.expect( 2 );
 		test.ok( metrics.Metric, "exists" );
@@ -67,6 +67,7 @@ var tests = exports.Metric = {
 			delete this.metric;
 			delete this.epoch;
 			this.clock.restore();
+			delete this.clock;
 			done();
 		},
 		"read only name and units": function( test ) {
@@ -113,13 +114,18 @@ var tests = exports.Metric = {
 			test.deepEqual( this.metric.values, [ 100, 200 ] );
 			test.done();
 		},
+		read: function( test ) {
+			test.expect( 1 );
+			test.equal( this.metric.read, this.metric.add, "read is alias to add" );
+			test.done();
+		},
 
 		// generated later:
 		summarize: {}
 	}
 };
 
-// generate summarize tests:
+// generate summarize metricTests:
 [{
 	values: [],
 	expect: { min: 0, max: 0, count: 0, total: 0, sum_of_squares: 0 }
@@ -131,10 +137,89 @@ var tests = exports.Metric = {
 	expect: { min: 100, max: 100, count: 1, total: 100, sum_of_squares: 10000 }
 }].forEach( function( fixture ) {
 	var values = JSON.stringify( fixture.values );
-	tests[ "with instance" ].summarize[ values ] = function( test ) {
+	metricTests[ "with instance" ].summarize[ values ] = function( test ) {
 		test.expect( 1 );
 		fixture.values.forEach( this.metric.add.bind( this.metric ) );
 		test.deepEqual( this.metric.summarize(), fixture.expect, values );
 		test.done();
 	};
 });
+
+exports.Counter = {
+	setUp: function( done ) {
+		this.epoch = 1390163149832;
+		this.clock = sinon.useFakeTimers(this.epoch);
+		done();
+	},
+	tearDown: function( done ) {
+		delete this.counter;
+		delete this.epoch;
+		this.clock.restore();
+		delete this.clock;
+		done();
+	},
+	"constructor exists": function( test ) {
+		test.expect( 2 );
+		test.ok( metrics.Counter, "exists" );
+		test.equal( typeof metrics.Counter, "function" );
+		test.done();
+	},
+	"per second": {
+		setUp: function( done ) {
+			this.counter = new metrics.Counter( "Test", "Tests/second" );
+			done();
+		},
+		unitTime: function( test ) {
+			test.expect( 1 );
+			test.equal( this.counter.unitTime, 1000 );
+			test.done();
+		},
+		"calculates per second properly": function( test ) {
+			test.expect( 1 );
+			this.clock.tick( 100 );
+			this.counter.seed( 0 );
+			this.clock.tick( 500 );
+			this.counter.read( 100 );
+			test.equal( this.counter.values[ 0 ], 200 );
+			test.done();
+		}
+	},
+	"per minute": {
+		setUp: function( done ) {
+			this.counter = new metrics.Counter( "Test", "Tests/minute" );
+			done();
+		},
+		unitTime: function( test ) {
+			test.expect( 1 );
+			test.equal( this.counter.unitTime, 60000 );
+			test.done();
+		},
+		"calculates per minute properly": function( test ) {
+			test.expect( 1 );
+			this.counter.seed( 100 );
+			this.clock.tick( 120000 );
+			this.counter.read( 110 );
+			test.equal( this.counter.values[ 0 ], 5 );
+			test.done();
+		}
+	},
+	"per hour": {
+		setUp: function( done ) {
+			this.counter = new metrics.Counter( "Test", "Tests/hour" );
+			done();
+		},
+		unitTime: function( test ) {
+			test.expect( 1 );
+			test.equal( this.counter.unitTime, 3600000 );
+			test.done();
+		},
+		"calculates per hour properly": function( test ) {
+			test.expect( 1 );
+			this.counter.seed( 0 );
+			this.clock.tick( 1800000 );
+			this.counter.read( 100 );
+			test.equal( this.counter.values[ 0 ], 200 );
+			test.done();
+		}
+	}
+};
