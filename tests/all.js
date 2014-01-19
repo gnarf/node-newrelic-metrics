@@ -51,7 +51,12 @@ function unitTests( callback ) {
 }
 
 function jshint( callback ) {
-	var jshintrc = readJSON( path.resolve( ROOT, ".jshintrc" ) );
+
+	function root( filename ) {
+		return path.resolve( ROOT, filename );
+	}
+
+	var jshintrc = readJSON( root( ".jshintrc" ) );
 	var globals = {};
 	if ( jshintrc.globals ) {
 		globals = jshintrc.globals;
@@ -62,7 +67,7 @@ function jshint( callback ) {
 	var reporter = require( "jshint/src/reporters/default" ).reporter;
 
 	var files = cli.gather({
-		args: ["lib", "tests"].map( path.resolve.bind( path, ROOT ) )
+		args: ["lib", "tests"].map( root )
 	});
 
 	var errors = [];
