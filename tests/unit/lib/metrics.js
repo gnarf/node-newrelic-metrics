@@ -1,3 +1,4 @@
+var sinon = require( "sinon" );
 var metrics = require( "../../../lib/metrics.js" );
 
 exports.Metric = {
@@ -9,7 +10,7 @@ exports.Metric = {
 	},
 	"invalid names": function( test ) {
 		var invalid = [
-			"!", "@", "#", "Component/Test", "test/no spaces"
+			1, null, undefined, "!", "@", "#", "Component/Test", "test/no spaces"
 		];
 		test.expect( invalid.length );
 		invalid.forEach( function( name ) {
@@ -33,7 +34,7 @@ exports.Metric = {
 	},
 	"invalid units": function( test ) {
 		var invalid = [
-			"!", "@", "#", "Component/Test/sec", "test/no spaces", "!Value"
+			1, null, undefined, "!", "@", "#", "Component/Test/sec", "test/no spaces", "!Value"
 		];
 		test.expect( invalid.length );
 		invalid.forEach( function( units ) {
@@ -57,11 +58,15 @@ exports.Metric = {
 	},
 	"with instance": {
 		setUp: function( done ) {
+			this.epoch = 1390163149832;
+			this.clock = sinon.useFakeTimers(this.epoch);
 			this.metric = new metrics.Metric( "Test", "TestUnit" );
 			done();
 		},
 		tearDown: function( done ) {
 			delete this.metric;
+			delete this.epoch;
+			this.clock.restore();
 			done();
 		},
 		"read only name and units": function( test ) {
@@ -88,6 +93,24 @@ exports.Metric = {
 		toString: function( test ) {
 			test.expect( 1 );
 			test.equal( this.metric.toString(), "[Metric Component/Test[TestUnit]]" );
+			test.done();
+		},
+		lastCollect: function( test ) {
+			test.expect( 1 );
+			test.equal( this.metric.lastCollect, this.epoch, "Correct Time" );
+			test.done();
+		},
+		values: function( test ) {
+			test.expect( 1 );
+			test.deepEqual( this.metric.values, [] );
+			test.done();
+		},
+		add: function( test ) {
+			test.expect( 2 );
+			this.metric.add( 100 );
+			test.deepEqual( this.metric.values, [ 100 ] );
+			this.metric.add( 200 );
+			test.deepEqual( this.metric.values, [ 100, 200 ] );
 			test.done();
 		}
 	}
