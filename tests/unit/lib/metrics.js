@@ -96,11 +96,6 @@ var metricTests = exports.Metric = {
 			test.equal( this.metric.toString(), "[Metric Component/Test[TestUnit]]" );
 			test.done();
 		},
-		lastCollect: function( test ) {
-			test.expect( 1 );
-			test.equal( this.metric.lastCollect, this.epoch, "Correct Time" );
-			test.done();
-		},
 		values: function( test ) {
 			test.expect( 1 );
 			test.deepEqual( this.metric.values, [] );
@@ -119,7 +114,33 @@ var metricTests = exports.Metric = {
 			test.equal( this.metric.read, this.metric.add, "read is alias to add" );
 			test.done();
 		},
+		collect: function( test ) {
+			test.expect( 4 );
+			this.metric.add( 1 );
+			var object = {};
+			var returnValue = this.metric.collect( object );
+			test.equal( object, returnValue, "Returns object passed" );
 
+			test.deepEqual( object, {
+				"Component/Test[TestUnit]": { min: 1, max: 1, count: 1, total: 1, sum_of_squares: 1 }
+			});
+
+			// clears values
+			test.deepEqual( this.metric.values, [] );
+
+			this.metric.add( 1 );
+			test.deepEqual( this.metric.collect(), object, "Returns same values for no argument passed" );
+			test.done();
+		},
+		clone: function( test ) {
+			test.expect( 3 );
+			this.metric.add( 1 );
+			var clone = this.metric.clone();
+			test.equal( clone.values.length, 0 );
+			test.notEqual( clone, this.metric );
+			test.ok( clone instanceof metrics.Metric );
+			test.done();
+		},
 		// generated later:
 		summarize: {}
 	}
@@ -187,6 +208,14 @@ exports.Counter = {
 			this.clock.tick( 500 );
 			this.counter.read( 100 );
 			test.equal( this.counter.values[ 0 ], 200 );
+			test.done();
+		},
+		"clone": function( test ) {
+			test.expect( 3 );
+			var clone = this.counter.clone();
+			test.notEqual( clone, this.counter );
+			test.ok( clone instanceof metrics.Counter );
+			test.equal( clone.unitTime, 1000 );
 			test.done();
 		}
 	},

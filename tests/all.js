@@ -3,8 +3,8 @@ var path = require( "path" );
 var ROOT = path.resolve( __dirname, ".." );
 
 all([
-	jshint,
-	unitTests
+	unitTests,
+	jshint
 ], function( errors ) {
 	if ( errors.length ) {
 		process.exit( 1 );
@@ -47,7 +47,7 @@ function unitTests( callback ) {
 	var reporter = nodeunit.reporters.default;
 	var options = require( "nodeunit/bin/nodeunit.json" );
 
-	reporter.run([ "tests/unit/lib" ], options, callback );
+	reporter.run([ "tests/unit", "tests/unit/lib" ], options, callback );
 }
 
 function jshint( callback ) {
@@ -67,7 +67,7 @@ function jshint( callback ) {
 	var reporter = require( "jshint/src/reporters/default" ).reporter;
 
 	var files = cli.gather({
-		args: ["lib", "tests"].map( root )
+		args: [ "index.js", "lib", "tests" ].map( root )
 	});
 
 	var errors = [];
@@ -91,6 +91,7 @@ function jshint( callback ) {
 	});
 
 	reporter(errors, [], { verbose: true });
+	console.log( "jshint check: " + files.length + " files checked, " + errors.length + " errors" );
 
 	if (errors.length) {
 		callback(errors);
