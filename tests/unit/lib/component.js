@@ -10,16 +10,48 @@ exports.factory = function( test ) {
 	test.done();
 };
 
-exports["factory requires guid"] = function( test ) {
-	test.expect( 2 );
-	// stuff the hash with all other required options if others are ever added
-	test.throws( function() {
-		component.factory( { guid: null } );
-	}, "{ guid: null }");
-	test.throws( function() {
-		component.factory( {} );
-	}, "{}" );
-	test.done();
+exports["factory options"] = {
+	"guid: required": function( test ) {
+		test.expect( 2 );
+		// stuff the hash with all other required options if others are ever added
+		test.throws( function() {
+			component.factory( { guid: null } );
+		}, "{ guid: null }");
+		test.throws( function() {
+			component.factory( {} );
+		}, "{}" );
+		test.done();
+	},
+	"duration: default": function( test ) {
+		var factory = component.factory({
+			guid: "test"
+		});
+		test.equal(factory.prototype.duration, 60);
+		test.done();
+	},
+	"duration: number": function( test ) {
+		var factory = component.factory({
+			guid: "test",
+			duration: 180
+		});
+		test.equal(factory.prototype.duration, 180);
+		test.done();
+	},
+	"duration: invalid options": function( test ) {
+		test.throws( function() {
+			component.factory({
+				guid: "test",
+				duration: "180"
+			});
+		});
+		test.throws( function() {
+			component.factory({
+				guid: "test",
+				duration: -1
+			});
+		});
+		test.done();
+	},
 };
 
 exports["test factory"] = {
