@@ -10,6 +10,18 @@ exports.factory = function( test ) {
 	test.done();
 };
 
+exports["factory requires guid"] = function( test ) {
+	test.expect( 2 );
+	// stuff the hash with all other required options if others are ever added
+	test.throws( function() {
+		component.factory( { guid: null } );
+	}, "{ guid: null }");
+	test.throws( function() {
+		component.factory( {} );
+	}, "{}" );
+	test.done();
+};
+
 exports["test factory"] = {
 	setUp: function( done ) {
 		this.factory = component.factory({ guid: "test.factory" });
