@@ -70,6 +70,30 @@ exports["test factory"] = {
 		test.equal( instance.guid, "test.factory", "got factory variable" );
 		test.done();
 	},
+	"duration: number": function( test ) {
+		var instance = this.factory({
+			guid: "test",
+			duration: 180
+		});
+		test.equal(instance.duration, 180);
+		test.done();
+	},
+	"duration: invalid options": function( test ) {
+		var factory = this.factory;
+		test.throws( function() {
+			factory({
+				guid: "test",
+				duration: "180"
+			});
+		});
+		test.throws( function() {
+			factory({
+				guid: "test",
+				duration: -1
+			});
+		});
+		test.done();
+	},
 };
 
 function MockMetric( name ) {
