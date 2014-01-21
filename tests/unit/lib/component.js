@@ -75,7 +75,7 @@ exports["test factory"] = {
 			guid: "test",
 			duration: 180
 		});
-		test.equal(instance.duration, 180);
+		test.equal( instance.duration, 180 );
 		test.done();
 	},
 	"duration: invalid options": function( test ) {
