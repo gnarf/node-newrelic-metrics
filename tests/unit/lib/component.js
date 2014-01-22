@@ -224,17 +224,21 @@ exports["test metrics factory"] = {
 		test.done();
 	},
 	"test collect": function( test ) {
-		var instance = this.factory();
+		var instance = this.factory({ name: "testname", duration: 10 });
 		var result = instance.collect();
-		test.deepEqual( result, {
+		test.deepEqual( result.metrics, {
 			test: "test",
 			"testArray[0]": "testArray[0]",
 			"testArray[1]": "testArray[1]"
 		}, "valid response from collect" );
 
-		test.ok( instance.metrics.test.collect.calledWith( result ) );
-		test.ok( instance.metrics.testArray[0].collect.calledWith( result ) );
-		test.ok( instance.metrics.testArray[1].collect.calledWith( result ) );
+		test.ok( instance.metrics.test.collect.calledWith( result.metrics ) );
+		test.ok( instance.metrics.testArray[0].collect.calledWith( result.metrics ) );
+		test.ok( instance.metrics.testArray[1].collect.calledWith( result.metrics ) );
+
+		test.equal( result.guid, "test.metrics.factory" );
+		test.equal( result.name, "testname" );
+		test.equal( result.duration, 10 );
 
 		test.done();
 	}
