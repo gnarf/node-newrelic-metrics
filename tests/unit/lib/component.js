@@ -1,7 +1,7 @@
 var component = require( "../../../lib/component" );
 var sinon = require("sinon");
 
-// var epoch = new Date(1980, 4, 27, 4);
+var epoch = +new Date(1980, 4, 27, 4);
 
 exports.factory = function( test ) {
 	test.expect( 2 );
@@ -69,6 +69,87 @@ exports["test factory"] = {
 		test.equal( instance.test, true, "got instance variable" );
 		test.equal( instance.guid, "test.factory", "got factory variable" );
 		test.done();
+	},
+	"test instance shape": {
+		setUp: function( done ) {
+			this.instance = this.factory({});
+			done();
+		},
+		tearDown: function( done ) {
+			delete this.instance;
+			done();
+		},
+		start: function( test ) {
+			test.equal(typeof this.instance.start, "function");
+			test.done();
+		},
+		stop: function( test ) {
+			test.equal(typeof this.instance.stop, "function");
+			test.done();
+		},
+		init: function( test ) {
+			test.equal(typeof this.instance.poll, "function");
+			test.done();
+		},
+		poll: function( test ) {
+			test.equal(typeof this.instance.poll, "function");
+			test.done();
+		},
+	},
+	"test polling logic": {
+		setUp: function( done ) {
+			this.clock = sinon.useFakeTimers( epoch );
+			this.init = sinon.stub();
+			this.poll = sinon.stub();
+			this.payload = {};
+			this.instance = this.factory({
+				duration: 10,
+				init: this.init,
+				poll: this.poll,
+				agent: {
+					deliver: sinon.spy()
+				},
+				collect: sinon.spy( function() { return this.payload; }.bind( this ) )
+			});
+			done();
+		},
+		tearDown: function( done ) {
+			this.clock.restore();
+			delete this.clock;
+			delete this.init;
+			delete this.payload;
+			delete this.poll;
+			delete this.instance;
+			done();
+		},
+		"standard logic": function( test ) {
+			this.instance.start();
+			test.ok( this.init.called, "init called" );
+			test.ok( !this.poll.called, "poll not called" );
+
+			// init hasn't called back yet, clock ticking shouldn't matter
+			this.clock.tick( 100000 );
+			test.ok( !this.poll.called, "poll not called" );
+
+			this.init.yield();
+			this.clock.tick( 10000 );
+			test.ok( this.poll.called, "poll called" );
+
+			// a second poll should start even if the first fails to respond
+			this.clock.tick( 30000 );
+			test.equal( this.poll.callCount, 4, "poll called 3 more times" );
+
+			// responding to the poll
+			this.poll.firstCall.yield();
+			test.ok( this.instance.collect.called, "called collect" );
+			test.ok( this.instance.agent.deliver.calledWith( this.payload ), "delivered payload" );
+
+			// calls the first one again, so this is a good test too
+			this.poll.yield();
+			test.equal( this.instance.collect.callCount, 4, "called collect 3 more times" );
+
+			test.done();
+		},
 	},
 	"duration: number": function( test ) {
 		var instance = this.factory({
