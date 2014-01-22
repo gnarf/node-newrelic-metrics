@@ -179,7 +179,12 @@ exports["test factory"] = {
 
 function MockMetric( name ) {
 	return {
+		seed: sinon.spy(),
 		read: sinon.spy(),
+		collect: sinon.spy(function( carry ) {
+			carry[name] = name;
+			return carry;
+		}),
 		clone: sinon.spy(function() {
 			return MockMetric( name );
 		})
@@ -217,6 +222,47 @@ exports["test metrics factory"] = {
 		test.notEqual( instance.metrics.testArray[0], proto.metrics.testArray[0] );
 		test.equal( instance.metrics.testArray[0].name, proto.metrics.testArray[0].name );
 		test.done();
+	},
+	"test collect": function( test ) {
+		var instance = this.factory();
+		var result = instance.collect();
+		test.deepEqual( result, {
+			test: "test",
+			"testArray[0]": "testArray[0]",
+			"testArray[1]": "testArray[1]"
+		}, "valid response from collect" );
+
+		test.ok( instance.metrics.test.collect.calledWith( result ) );
+		test.ok( instance.metrics.testArray[0].collect.calledWith( result ) );
+		test.ok( instance.metrics.testArray[1].collect.calledWith( result ) );
+
+		test.done();
 	}
 };
 
+// create seed and read tests
+[ "seed", "read" ].forEach( function( method ) {
+	this["test " + method] = function( test ) {
+		var instance = this.factory();
+		instance[ method ]({
+			test: 1,
+			testArray: 2
+		});
+		test.ok( instance.metrics.test[ method ].calledWith( 1 ), "right value to test" );
+		test.ok( instance.metrics.testArray[ 0 ][ method ].calledWith( 2 ), "right value to testArray[0]" );
+		test.ok( instance.metrics.testArray[ 1 ][ method ].calledWith( 2 ), "right value to testArray[1]" );
+
+		instance.metrics.test[ method ].reset();
+		instance.metrics.testArray[ 0 ][ method ].reset();
+		instance.metrics.testArray[ 1 ][ method ].reset();
+		instance[ method ]({
+			test: 3
+		});
+
+		test.ok( instance.metrics.test[ method ].calledWith( 3 ), "called test" );
+		test.ok( !instance.metrics.testArray[ 0 ][ method ].called, "did not call testArray" );
+		test.ok( !instance.metrics.testArray[ 1 ][ method ].called, "did not call testArray" );
+
+		test.done();
+	};
+}, exports["test metrics factory"]);
