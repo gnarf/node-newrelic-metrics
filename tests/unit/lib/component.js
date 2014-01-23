@@ -141,12 +141,11 @@ exports["test factory"] = {
 
 			// responding to the poll
 			this.poll.firstCall.yield();
-			test.ok( this.instance.collect.called, "called collect" );
-			test.ok( this.instance.agent.deliver.calledWith( this.payload ), "delivered payload" );
+			test.ok( this.instance.agent.deliver.calledWith( this.instance ), "called agent deliver" );
 
 			// calls the first one again, so this is a good test too
 			this.poll.yield();
-			test.equal( this.instance.collect.callCount, 4, "called collect 3 more times" );
+			test.equal( this.instance.agent.deliver.callCount, 4, "called deliver 3 more times" );
 
 			test.done();
 		},

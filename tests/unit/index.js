@@ -1,15 +1,16 @@
-var component = require("../../lib/component");
-var metrics = require("../../lib/metrics");
-var index = require("../../index");
+var index = require( "../../index" );
 
-exports.metrics = function( test ) {
-	test.expect( 1 );
-	test.equal( index.metrics, metrics );
-	test.done();
+var expects = {
+	agent: require("../../lib/agent"),
+	component: require("../../lib/component"),
+	metrics: require("../../lib/metrics")
 };
 
-exports.component = function( test ) {
-	test.expect( 1 );
-	test.equal( index.component, component );
-	test.done();
-};
+Object.keys(expects).forEach( function( key ) {
+	exports[ key ] = {};
+	exports[ key ][ "exports lib/" + key ] = function( test ) {
+		test.expect( 1 );
+		test.equal( index[ key ], expects[ key ] );
+		test.done();
+	};
+});
