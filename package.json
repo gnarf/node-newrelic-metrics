@@ -1,7 +1,16 @@
 {
   "name": "newrelic-metrics",
+  "description": "A simple set of utilities for the newrelic metrics API",
   "version": "0.0.0",
   "author": "Corey Frang <gnarf37@gmail.com> (http://gnarf.net)",
+  "homepage": "https://github.com/gnarf/node-newrelic-metrics/",
+  "bugs": {
+    "url": "https://github.com/gnarf/node-newrelic-metrics/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gnarf/node-newrelic-metrics.git"
+  },
   "license": {
     "type": "MIT",
     "url": "https://github.com/gnarf/node-newrelic-metrics/raw/master/LICENSE-MIT.txt"
